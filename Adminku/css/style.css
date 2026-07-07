@@ -1,0 +1,134 @@
+:root {
+    /* Palet Layanan Publik (Profesional & Terpercaya) */
+    --primary-color: #0F766E; 
+    --primary-hover: #115E59;
+    --secondary-color: #14B8A6;
+    --success-color: #16A34A; 
+    --success-bg: #ecfdf5;
+    --warning-color: #D97706; 
+    --warning-bg: #fffbeb;
+    --danger-color: #DC2626;  
+    --danger-bg: #fef2f2;
+    
+    /* Netral & Whitespace */
+    --surface-main: #ffffff;
+    --surface-subtle: #f8fafc;
+    --border-subtle: #e2e8f0;
+    
+    /* Tipografi */
+    --text-strong: #0f172a;
+    --text-body: #334155;
+    --text-muted: #64748b;
+    --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+[data-theme="dark"] {
+    color-scheme: dark;
+    --primary-color: #5EEAD4;
+    --primary-hover: #2DD4BF;
+    --secondary-color: #14B8A6;
+    --success-color: #34d399;
+    --success-bg: #052e25;
+    --warning-color: #fbbf24;
+    --warning-bg: #422006;
+    --danger-color: #f87171;
+    --danger-bg: #450a0a;
+    --surface-main: #0f172a;
+    --surface-subtle: #020617;
+    --border-subtle: #1e293b;
+    --text-strong: #f8fafc;
+    --text-body: #cbd5e1;
+    --text-muted: #94a3b8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: var(--font-sans); color: var(--text-body);
+    background-color: var(--surface-subtle); line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+*:focus-visible { outline: 3px solid var(--primary-color); outline-offset: 2px; border-radius: 4px; }
+
+button, select, input[type="text"], input[type="password"], input[type="date"] {
+    min-height: 44px; font-family: inherit; font-size: 1rem;
+}
+
+.visually-hidden {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.btn-primary {
+    background: var(--primary-color); color: white; border: none;
+    padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 500;
+    cursor: pointer; transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-secondary {
+    background: var(--surface-main); color: var(--text-strong);
+    border: 1px solid var(--border-subtle); padding: 0.75rem 1rem;
+    border-radius: 6px; font-weight: 600; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+}
+.btn-secondary:hover { border-color: var(--primary-color); color: var(--primary-color); }
+
+.btn-danger {
+    background: transparent; color: var(--danger-color); 
+    border: 1px solid var(--danger-color); padding: 0.75rem 1.5rem; 
+    border-radius: 6px; font-weight: 500; cursor: pointer;
+}
+
+.btn-block { width: 100%; }
+
+.btn-icon, .btn-text {
+    background: transparent; border: none; color: var(--text-muted);
+    cursor: pointer; display: flex; align-items: center; gap: 0.5rem;
+}
+.btn-icon {
+    justify-content: center; width: 44px; height: 44px; border-radius: 6px;
+}
+.btn-icon:hover, .btn-text:hover {
+    background: var(--surface-subtle); color: var(--text-strong);
+}
+.theme-toggle[aria-pressed="true"] {
+    color: var(--primary-color);
+}
+
+.conversational-form { display: flex; flex-direction: column; gap: 1.5rem; }
+.form-field { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-field label { font-weight: 500; color: var(--text-strong); font-size: 0.95rem; }
+.form-field input, .form-field select {
+    padding: 0.75rem; border: 1px solid var(--border-subtle);
+    border-radius: 6px; background: var(--surface-main); color: var(--text-strong);
+}
+.field-hint {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-top: 1px solid var(--border-subtle);
+}
+.toggle-row label {
+    color: var(--text-strong);
+    font-weight: 600;
+}
+.toggle-row input[type="checkbox"] {
+    width: 1.25rem;
+    height: 1.25rem;
+    accent-color: var(--primary-color);
+}
+input, select {
+    color: var(--text-strong);
+}
+input::placeholder {
+    color: var(--text-muted);
+}
+.hidden { display: none !important; }

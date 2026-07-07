@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdminKu - Layanan Dokumen Pribadi</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0F766E">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/relativeTime.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/locale/id.js"></script>
+    
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <script>
+        try {
+            const savedTheme = localStorage.getItem('adminku-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.theme = savedTheme || (prefersDark ? 'dark' : 'light');
+        } catch (error) {
+            document.documentElement.dataset.theme = 'light';
+        }
+    </script>
+</head>
+<body>
+
+    <div id="auth-screen" class="auth-overlay">
+        <main class="auth-card" role="dialog" aria-labelledby="auth-title">
+            <div class="auth-icon-wrapper" style="text-align: center; margin-bottom: 1rem;">
+                <i data-lucide="shield" aria-hidden="true" style="width: 56px; height: 56px; color: var(--primary-color);"></i>
+            </div>
+            <h2 id="auth-title" style="text-align: center; margin-bottom: 0.5rem;">Keamanan AdminKu</h2>
+            <p id="auth-desc" style="text-align: center; color: var(--text-muted); margin-bottom: 1.5rem;">Silakan masukkan PIN Anda.</p>
+            <form id="auth-form" class="auth-form-group" style="display: flex; flex-direction: column; gap: 1rem;">
+                <label for="auth-pin" class="visually-hidden">PIN Keamanan</label>
+                <input type="password" id="auth-pin" placeholder="••••" required autocomplete="new-password" inputmode="numeric" style="text-align: center; font-size: 2rem; letter-spacing: 0.5rem; padding: 1rem; border-radius: 8px; border: 2px solid var(--border-subtle);">
+                <button type="submit" class="btn-primary btn-block" id="btn-auth-submit">Buka Akses</button>
+            </form>
+        </main>
+    </div>
+
+    <header class="app-header">
+        <div class="container header-content">
+            <div class="brand-group">
+                <div class="logo" style="display: flex; align-items: center; gap: 0.5rem;">
+                    <i data-lucide="file-check-2" aria-hidden="true" style="color: var(--primary-color);"></i>
+                    <span class="brand-name">AdminKu</span>
+                </div>
+                <span class="brand-tagline">Penyimpanan Dokumen Lokal Terenkripsi</span>
+            </div>
+            <nav class="header-actions" aria-label="Menu Utama">
+                <button id="btn-theme" class="btn-icon theme-toggle" type="button" aria-label="Aktifkan mode gelap" title="Ganti Tema" aria-pressed="false"><i data-lucide="moon"></i></button>
+                <button id="btn-settings" class="btn-icon" type="button" aria-label="Buka Pengaturan" title="Pengaturan"><i data-lucide="settings"></i></button>
+                <button id="btn-import" class="btn-icon" aria-label="Impor Data Cadangan" title="Pulihkan Data"><i data-lucide="upload"></i></button>
+                <button id="btn-export" class="btn-icon" aria-label="Ekspor Data Cadangan" title="Cadangkan Data"><i data-lucide="download"></i></button>
+                <button id="btn-info" class="btn-text" aria-label="Bantuan dan Informasi" style="font-weight: 500;"><i data-lucide="help-circle"></i> Bantuan</button>
+            </nav>
+            <input type="file" id="import-file" accept=".json" style="display: none;" aria-hidden="true">
+        </div>
+    </header>
+
+    <main class="container main-content" style="padding-bottom: 6rem;">
+        
+        <section class="section-greeting" aria-live="polite">
+            <h2 id="user-greeting">Selamat Datang di AdminKu</h2>
+            <p id="assistant-summary" class="text-subtitle">Menyiapkan ruang kerja Anda...</p>
+        </section>
+
+        <section id="summary-widgets" class="summary-grid hidden" aria-label="Ringkasan Dokumen">
+            <article class="stat-card stat-safe">
+                <span class="stat-value" id="count-safe">0</span>
+                <span class="stat-label">Dokumen Aman</span>
+            </article>
+            <article class="stat-card stat-warning">
+                <span class="stat-value" id="count-warning">0</span>
+                <span class="stat-label">Perlu Diperpanjang</span>
+            </article>
+            <article class="stat-card stat-urgent">
+                <span class="stat-value" id="count-urgent">0</span>
+                <span class="stat-label">Habis Masa Berlaku</span>
+            </article>
+        </section>
+
+        <section id="controls-bar" class="controls-bar hidden" aria-label="Penyaringan Dokumen">
+            <div class="search-input-group">
+                <i data-lucide="search" aria-hidden="true" style="color: var(--text-muted);"></i>
+                <label for="search-input" class="visually-hidden">Cari dokumen</label>
+                <input type="text" id="search-input" placeholder="Ketik nama dokumen...">
+            </div>
+            <label for="filter-category" class="visually-hidden">Filter berdasarkan kategori</label>
+            <select id="filter-category" class="select-input" style="padding: 0.75rem; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--surface-main);">
+                <option value="All">Semua Kategori</option>
+                <option value="Dokumen">Dokumen Identitas</option>
+                <option value="Kendaraan">Kendaraan</option>
+                <option value="Tagihan">Tagihan Bulanan</option>
+                <option value="Lainnya">Lainnya</option>
+            </select>
+            <label for="filter-view" class="visually-hidden">Filter tampilan dokumen</label>
+            <select id="filter-view" class="select-input" style="padding: 0.75rem; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--surface-main);">
+                <option value="active">Aktif</option>
+                <option value="favorites">Favorit</option>
+                <option value="archived">Arsip</option>
+                <option value="all">Semua</option>
+            </select>
+        </section>
+        
+        <section id="app-mount" aria-label="Daftar Dokumen Tersimpan" style="margin-top: 1.5rem;">
+            <div class="empty-state"><p>Memuat data lokal...</p></div>
+        </section>
+        
+        <button id="btn-add-real" class="fab-primary" aria-label="Tambahkan Dokumen Baru">
+            <i data-lucide="plus"></i>
+            <span class="fab-label">Tambah Dokumen</span>
+        </button>
+    </main>
+
+    <dialog id="form-modal" class="modal-backdrop hidden" aria-labelledby="modal-title">
+        <div class="modal-surface">
+            <header class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 id="modal-title" style="font-size: 1.25rem; font-weight: 700;">Registrasi Dokumen</h2>
+                <button id="btn-close-modal" class="btn-icon" aria-label="Tutup formulir"><i data-lucide="x"></i></button>
+            </header>
+            <form id="real-form" class="conversational-form">
+                <input type="hidden" id="item-id">
+                
+                <div class="form-field">
+                    <label for="title">Apa nama dokumen yang ingin Anda simpan?</label>
+                    <input type="text" id="title" required placeholder="Contoh: KTP, STNK Motor, Paspor">
+                </div>
+                
+                <div class="form-field">
+                    <label for="category">Termasuk dalam kelompok apakah dokumen ini?</label>
+                    <select id="category" required>
+                        <option value="Dokumen">Dokumen Identitas</option>
+                        <option value="Kendaraan">Berkas Kendaraan</option>
+                        <option value="Tagihan">Tagihan & Langganan</option>
+                        <option value="Lainnya">Kategori Lainnya</option>
+                    </select>
+                </div>
+                
+                <div class="form-field">
+                    <label for="expiry">Kapan masa berlaku dokumen ini berakhir?</label>
+                    <input type="date" id="expiry" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="tags">Tag dokumen</label>
+                    <input type="text" id="tags" placeholder="Contoh: keluarga, kendaraan, pajak">
+                    <p class="field-hint">Pisahkan beberapa tag dengan koma.</p>
+                </div>
+
+                <div class="form-field">
+                    <label for="reminder-days">Interval pengingat</label>
+                    <input type="text" id="reminder-days" placeholder="90, 30, 14, 7, 1, 0">
+                    <p class="field-hint">Gunakan angka hari sebelum jatuh tempo. Sertakan 0 untuk hari H.</p>
+                </div>
+
+                <div class="toggle-row">
+                    <label for="is-favorite">Tandai sebagai favorit</label>
+                    <input type="checkbox" id="is-favorite">
+                </div>
+
+                <div class="toggle-row">
+                    <label for="is-archived">Pindahkan ke arsip</label>
+                    <input type="checkbox" id="is-archived">
+                </div>
+                
+                <div class="form-field">
+                    <label for="document-image">Apakah Anda ingin melampirkan foto dokumen? (Opsional)</label>
+                    <input type="file" id="document-image" accept="image/*">
+                    <img id="image-preview" class="image-preview-box hidden" alt="Pratinjau foto dokumen" style="width: 100%; margin-top: 0.5rem; border-radius: 8px; max-height: 180px; object-fit: cover; border: 1px solid var(--border-subtle);">
+                </div>
+                
+                <footer class="form-actions" style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: 1.5rem;">
+                    <button type="submit" class="btn-primary btn-block" id="btn-submit">Simpan Dokumen</button>
+                    <button type="button" class="btn-danger btn-block hidden" id="btn-delete-modal">Hapus Dokumen Secara Permanen</button>
+                </footer>
+            </form>
+        </div>
+    </dialog>
+
+    <dialog id="detail-modal" class="modal-backdrop hidden" aria-labelledby="detail-title">
+        <div class="modal-surface detail-surface">
+            <header class="modal-header">
+                <div>
+                    <p id="detail-category" class="doc-category"></p>
+                    <h2 id="detail-title">Detail Dokumen</h2>
+                </div>
+                <button id="btn-close-detail" class="btn-icon" aria-label="Tutup detail"><i data-lucide="x"></i></button>
+            </header>
+            <div id="detail-content" class="detail-content"></div>
+            <footer class="detail-actions">
+                <button type="button" id="btn-detail-favorite" class="btn-secondary"><i data-lucide="star"></i> Favorit</button>
+                <button type="button" id="btn-detail-archive" class="btn-secondary"><i data-lucide="archive"></i> Arsip</button>
+                <button type="button" id="btn-detail-edit" class="btn-primary"><i data-lucide="pencil"></i> Edit</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <dialog id="settings-modal" class="modal-backdrop hidden" aria-labelledby="settings-title">
+        <div class="modal-surface">
+            <header class="modal-header">
+                <h2 id="settings-title">Pengaturan</h2>
+                <button id="btn-close-settings" class="btn-icon" aria-label="Tutup pengaturan"><i data-lucide="x"></i></button>
+            </header>
+            <form id="settings-form" class="conversational-form">
+                <div class="form-field">
+                    <label for="setting-lock-minutes">Kunci otomatis setelah tidak aktif</label>
+                    <select id="setting-lock-minutes">
+                        <option value="2">2 menit</option>
+                        <option value="5">5 menit</option>
+                        <option value="10">10 menit</option>
+                        <option value="15">15 menit</option>
+                        <option value="30">30 menit</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="setting-reminder-days">Interval pengingat bawaan</label>
+                    <input type="text" id="setting-reminder-days" placeholder="90, 30, 7, 1, 0">
+                    <p class="field-hint">Dipakai untuk dokumen baru. Anda tetap bisa mengubahnya per dokumen.</p>
+                </div>
+                <button type="submit" class="btn-primary btn-block">Simpan Pengaturan</button>
+            </form>
+        </div>
+    </dialog>
+
+    <dialog id="faq-modal" class="modal-backdrop hidden" aria-labelledby="faq-title">
+        <div class="modal-surface">
+            <header class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 id="faq-title" style="font-size: 1.25rem; font-weight: 700;">Informasi & Bantuan</h2>
+                <button id="btn-close-faq" class="btn-icon" aria-label="Tutup bantuan"><i data-lucide="x"></i></button>
+            </header>
+            <div class="modal-body text-content" style="display: flex; flex-direction: column; gap: 1rem; line-height: 1.6;">
+                <div>
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: var(--success-color); font-size: 1rem;"><i data-lucide="shield-check"></i> Privasi Terjamin (Lokal)</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-body);">AdminKu adalah layanan offline-first. Data Anda dienkripsi secara aman dan tidak pernah dikirimkan ke server internet manapun.</p>
+                </div>
+                <div>
+                    <h3 style="display: flex; align-items: center; gap: 0.5rem; color: var(--warning-color); font-size: 1rem;"><i data-lucide="alert-triangle"></i> Pencadangan Mandiri</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-body);">Gunakan fitur Ekspor (Ikon Unduh) secara berkala. Jika Anda membersihkan data cache peramban (browser), dokumen di aplikasi ini akan ikut terhapus permanen.</p>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <div id="toast-container" class="toast-region" aria-live="assertive" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 9999;"></div>
+
+    <script type="module" src="js/app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW failed: ', err));
+            });
+        }
+    </script>
+</body>
+</html>
